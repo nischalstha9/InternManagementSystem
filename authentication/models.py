@@ -5,7 +5,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from datetime import timedelta, datetime
-from .managers import AllUserManager, CustomUserManager, InternManager
+from .managers import AllUserManager, CustomUserManager, InternManager, SupervisorManager
 from .constants import DEFAULT_AVATAR
 from .tasks import send_mail_asynchron
 from PIL import Image
@@ -21,7 +21,7 @@ GENDER_CHOICES = (
 
 ROLE_CHOICES = (
     (0, 'Admin'),
-    (1, 'Staff'),
+    (1, 'Supervisor'),
     (2, 'Intern'),
 )
 
@@ -95,6 +95,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class Intern(CustomUser):
     objects = InternManager()
+    dob = models.DateField(_('Date of birth'),blank=True, null=True)
+
+    class Meta:
+        verbose_name_plural = "Interns"
+
+    def save(self, *args, **kwargs):
+        self.role = 2
+        self.is_staff = False
+        self.is_superuser = False
+
+        super(Intern,self).save(*args, **kwargs)
+
+class Supervisor(CustomUser):
+    objects = SupervisorManager()
     dob = models.DateField(_('Date of birth'),blank=True, null=True)
 
     class Meta:

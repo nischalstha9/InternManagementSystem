@@ -243,3 +243,6 @@ class InternSerializer(serializers.ModelSerializer, CommonUserSerializerMixin):
         if('password' in [x for x in validated_data]):
             validated_data.pop('password')
         return super().update(instance, validated_data)
+
+class SupervisorSerializer(InternSerializer):
+    pass

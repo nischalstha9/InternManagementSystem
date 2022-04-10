@@ -1,8 +1,8 @@
 from rest_framework_simplejwt.views import TokenObtainPairView
-from authentication.serializers import MyTokenObtainPairSerializer, CustomUserSerializer, InternSerializer, UserTokenSerializer, CustomTokenObtainSlidingSerializer, TokenVerificationSerializer, PasswordChangeSerializer,PasswordResetSerializer
+from authentication.serializers import MyTokenObtainPairSerializer, CustomUserSerializer, InternSerializer, SupervisorSerializer, UserTokenSerializer, CustomTokenObtainSlidingSerializer, TokenVerificationSerializer, PasswordChangeSerializer,PasswordResetSerializer
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from authentication.models import CustomUser, UserToken, Intern
+from authentication.models import CustomUser, Supervisor, UserToken, Intern
 from authentication.permissions import IsAdminPermission, is_user_admin, is_user_intern
 from rest_framework.views import APIView
 from rest_framework import serializers
@@ -112,23 +112,29 @@ class UserView(APIView):
     def get_queryset(self):
         if is_user_admin(self.request):
             return CustomUser.objects.all()
-        return Customer.objects.all()
+        elif is_user_intern:
+            return Intern.objects.all()
+        else:
+            return Supervisor.objects.all()
 
     def get_serializer_class(self):
         if is_user_admin(self.request):
             return CustomUserSerializer
-        return InternSerializer
+        elif is_user_intern:
+            return InternSerializer
+        else:
+            return SupervisorSerializer
     
 
     def get(self, request):
         if request.user.is_authenticated:
             instance = request.user
             serializer = self.get_serializer_class()
-            if is_user_customer(request):
-                try:
-                    instance = Customer.objects.get(id=instance.id)
-                except:
-                    pass
+            # if is_user_intern(request):
+            #     try:
+            #         instance = Intern.objects.get(id=instance.id)
+            #     except:
+            #         pass
             if instance is not None:
                 serializer = serializer(instance)
                 return Response(serializer.data)
@@ -141,9 +147,9 @@ class UserView(APIView):
     def patch(self, request, format=None):
         if request.user.is_authenticated:
             instance = request.user
-            if is_user_customer(request):
+            if is_user_intern(request):
                 try:
-                    instance = Customer.objects.get(id=instance.id)
+                    instance = Intern.objects.get(id=instance.id)
                 except:
                     pass
             serializer = self.get_serializer_class()
@@ -309,70 +315,4 @@ class ForgetPasswordAPIView(APIView):
         except Exception as ex:
             print(ex)
             return Response({"detail": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# class CustomerCRUView(APIView):
-#     permission_classes = [permissions.AllowAny]
-
-#     def get(self, request):
-#         if request.user.is_authenticated:
-#             try:
-#                 # if is_user_admin(request.user):
-#                 #     instance = CustomUser.objects.filter(pk=request.user.id).last()
-#                 # elif is_user_customer(request.user):
-#                 instance = Customer.objects.filter(pk=request.user.id).last()
-#                 if instance is not None:
-#                     serializer = InternSerializer(instance)
-#                     return Response(serializer.data)
-#                 else:
-#                     return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
-#             except Exception:
-#                 return Response(status=status.HTTP_400_BAD_REQUEST)
-#         return Response({"detail":"Unauthorized User"}, status=status.HTTP_401_UNAUTHORIZED)
-
-#     def patch(self, request, format=None):
-#         if request.user.is_authenticated:
-#             instance = Customer.objects.filter(pk=request.user.id).last()
-#             serializer = InternSerializer(
-#                 instance, data=request.data, partial=True)
-#             if(serializer.is_valid(raise_exception=True)):
-#                 serializer.save()
-#                 return Response(serializer.data)
-#             else:
-#                 return Response(status=status.HTTP_400_BAD_REQUEST)
-#         return Response({"detail":"Unauthorized User"}, status=status.HTTP_401_UNAUTHORIZED)
-#         # except serializers.ValidationError as ex:
-#         #     return Response(ex.detail, status=status.HTTP_400_BAD_REQUEST)
-#         # except Exception as ex:
-#         #     return Response({"detail": ex}, status=status.HTTP_400_BAD_REQUEST)
-
-#     def post(self, request, format='json'):
-#         # try:
-#         serializer = InternSerializer(
-#             data=request.data, context={"request": request})
-#         if serializer.is_valid(raise_exception=True):
-#             user = serializer.save()
-#             if user:
-#                 json = serializer.data
-#                 return Response(json, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#         # except serializers.ValidationError as err:
-#         #     return Response(err.detail, status=status.HTTP_400_BAD_REQUEST)
-#         # except Exception:
-#         #     return Response({"detail": "Error creating customer"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# class CustomerListView(ListAPIView):
-#     permission_classes = [IsAdminPermission]
-#     search_fields = ['first_name', 'last_name', 'email']
-#     filter_backends = (filters.SearchFilter,)
-#     queryset = Customer.objects.all()
-#     serializer_class = InternSerializer
-
-
-# class CustomerDetailView(RetrieveUpdateDestroyAPIView):
-#     permission_classes = [IsAdminPermission]
-#     queryset = Customer.objects.all()
-#     serializer_class = InternSerializer
-
 

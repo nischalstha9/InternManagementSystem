@@ -61,7 +61,7 @@ class ReadOnly(permissions.BasePermission):
         return request.method in permissions.SAFE_METHODS
 
 
-class IsAdminOrShopUserPermission(permissions.BasePermission):
+class IsAdminOrSupervisorPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.is_authenticated and (request.user.role == 0 or request.user.role == 1):
             return True
@@ -73,8 +73,8 @@ class IsInternPermission(permissions.BasePermission):
             return True
         return False
 
-class IsDontationOwnerOrReadOnlyPermission(permissions.BasePermission):
+class IsTaskOwnerOrReadOnlyPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS or is_user_admin(request):
             return True
-        return obj.user == request.user
+        return obj.supervisor == request.user
