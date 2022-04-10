@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     # 'django.contrib.sites',
     'rest_framework',
     'authentication',
+    'task',
+    'attendence',
 ]
 # SITE_ID = 1
 
@@ -85,8 +87,12 @@ WSGI_APPLICATION = 'project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get("DATABASE_NAME"),
+        'USER': os.environ.get("DATABASE_USER"),
+        'PASSWORD': os.environ.get("DATABASE_PASSWORD"),
+        'HOST': os.environ.get("DATABASE_HOST", "127.0.0.1"),
+        'PORT': os.environ.get("DATABASE_PORT", "5432"),
     }
 }
 

@@ -1,33 +1,32 @@
 from rest_framework import permissions
+from rest_framework.generics import get_object_or_404
 from .models import CustomUser
-# from hotel.models import Hotel
 
 
-def is_user_customer_or_anonym(request):
+def is_user_intern_or_anonym(request):
     if request.user.is_authenticated:
         return request.user.role == 2
     else:
         return True
 
 
-def is_user_customer(request):
+def is_user_intern(request):
     if request.user.is_authenticated:
         return request.user.role == 2
     else:
         return False
 
 
-def is_user_hotel_user(request):
+def is_user_admin(request):
     if request.user.is_authenticated:
-        return request.user.role == 1
-    else:
-        return False
+        return request.user.role == 0
+    return False
 
 
-class IsCustomerOrAnonymPermission(permissions.BasePermission):
+class IsInternOrAnonymPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        return is_user_customer_or_anonym(request)
+        return is_user_intern_or_anonym(request)
 
 
 class OwnProfilePermissionUrl(permissions.BasePermission):
@@ -51,55 +50,31 @@ class OnlyAdminPostPermission(permissions.BasePermission):
                 return True
         return False
 
-
-class OnlyAdminOrHotelUserChangePermission(permissions.BasePermission):
-
-    def has_permission(self, request, view):
-        if request.method == 'GET':
-            return True
-        if request.user.is_authenticated:
-            if (request.method in ['POST', 'PATCH', 'PUT', 'DELETE']) and request.user.role in [0, 1]:
-                return True
-            else:
-                return False
-        return False
-
-
 class IsAdminPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.is_authenticated and request.user.role == 0:
             return True
         return False
 
+class ReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS
 
-class IsAdminOrHotelUserPermission(permissions.BasePermission):
+
+class IsAdminOrShopUserPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.user.is_authenticated and (request.user.role == 0 or request.user.role == 1):
             return True
         return False
 
-
-class IsHotelUserPermission(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.user.is_authenticated and request.user.role == 1:
-            return True
-        return False
-
-
-class IsCustomerPermission(permissions.BasePermission):
+class IsInternPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if(request.user.is_authenticated and request.user.role == 2):
             return True
         return False
 
-
-class IsAdminOrHotelOwnerPermission(permissions.BasePermission):
-    def has_permission(self, request, view):
-        try:
-            slug = view.kwargs.get('slug', None)
-            hotel = Hotel.objects.get(slug=slug)
-            if request.user.role == 0 or (request.user.role == 1 and request.user.hoteluser.hotel == hotel):
-                return True
-            return False
-        except Exception:
-            return False
+class IsDontationOwnerOrReadOnlyPermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS or is_user_admin(request):
+            return True
+        return obj.user == request.user

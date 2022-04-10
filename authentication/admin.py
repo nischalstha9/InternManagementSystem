@@ -1,37 +1,79 @@
+from django.contrib.auth.models import Group
 from django.contrib import admin
-from .models import CustomUser,  Customer
+from .models import *
+from .forms import UserChangeForm
 from django.contrib.auth.admin import UserAdmin
-from .forms import CustomUserCreationForm, CustomUserChangeForm
+
+
+# Text to put at the end of each page's <title>.
+admin.site.site_title = "Intern Management System | Admin"
+
+# Text to put in each page's <h1> (and above login form).
+admin.site.site_header = "Intern Management System Administration"
+
+# Text to put at the top of the admin index page.
+admin.site.index_title = "Home"
 
 
 class CustomUserAdmin(UserAdmin):
-    add_form = CustomUserCreationForm
-    form = CustomUserChangeForm
-    model = CustomUser
-    list_display = ('email', 'role', 'is_active',)
-    list_filter = ('email', 'role', 'is_active',)
+    # The forms to add and change user instances
+    form = UserChangeForm
+
+    # The fields to be used in displaying the User model.
+    # These override the definitions on the base UserAdmin
+    # that reference specific fields on auth.User.
     fieldsets = (
-        (None, {'fields': ('first_name', 'last_name',
-                           'email', 'password', 'email_verified')}),
+        (None, {'fields': ('email', 'password')}),
+        ("Personal Info", {'fields': ('first_name', 'last_name','gender','phone',"avatar")}),
+        ("Status", {'fields': ('is_active',"email_verified",'is_staff', "is_superuser")}),
         ('Permissions', {'fields': ('role',)}),
-        ('Extra', {'fields': ('phone', 'gender', 'avatar')}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+        ('Important dates', {'fields': ("date_joined",'last_login',)}),
     )
     add_fieldsets = (
-        (None, {
+        ("Required", {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'role', 'is_active')}
-         ),
+            'fields': ('email', 'password1', 'password2')}
+        ),
+        ("Meta", {
+            'classes': ('wide',),
+            'fields': ('first_name', 'last_name','role')}
+        ),
     )
-    search_fields = ('email',)
-    ordering = ('email',)
+    list_display = ["id","email", "first_name","last_name","role"]
+    list_display_links = ['email']
+    search_fields = ('email','first_name','last_name')
+    search_help_text = "Search helps by title and ID"
+    show_full_result_count = True
+    save_as = True
+    ordering = ('email','id','first_name','last_name')
+    list_filter = [
+        'role',
+        'gender',
+        'is_active',
+        'email_verified',
+        ]
 
+class InternAdmin(CustomUserAdmin):
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ("Personal Info", {'fields': ('first_name', 'last_name','gender','phone',"avatar","dob")}),
+        ("Status", {'fields': ('is_active',"email_verified",'is_staff', "is_superuser")}),
+        ('Permissions', {'fields': ('role',)}),
+        ('Important dates', {'fields': ("date_joined",'last_login',)}),
+    )
+    add_fieldsets = (
+        ("Required", {
+            'classes': ('wide',),
+            'fields': ('email', 'password1', 'password2')}
+        ),
+        ("Meta", {
+            'classes': ('wide',),
+            'fields': ('first_name', 'last_name','role',"dob")}
+        ),
+    )
 
-class HotelUserAdmin(admin.ModelAdmin):
-    pass
-
-
-# admin.site.register(HotelUser, HotelUserAdmin)
 
 admin.site.register(CustomUser, CustomUserAdmin)
-admin.site.register(Customer)
+admin.site.register(Intern, InternAdmin)
+admin.site.register(UserToken)
+admin.site.unregister(Group)
