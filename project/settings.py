@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     # 'django.contrib.sites',
     'rest_framework',
     'django_filters',
+    'drf_yasg',
+    'debug_toolbar',
     'authentication',
     'task',
     'attendence',
@@ -60,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -202,3 +205,7 @@ REST_USE_JWT = True
 JWT_AUTH_COOKIE = 'access_token'
 JWT_AUTH_REFRESH_COOKIE = 'refresh_token'
 PROJECT_NAME = "INTERN MANAGEMENT SYSTEM"
+
+INTERNAL_IPS = [
+    "127.0.0.1"
+]
