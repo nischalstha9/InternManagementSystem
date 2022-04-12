@@ -177,7 +177,7 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # SIMPLE JWT
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
@@ -189,6 +189,10 @@ SIMPLE_JWT = {
     "USER_ID_CLAIM": "user_id",
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
     "TOKEN_TYPE_CLAIM": "token_type",
+    "REFRESH_COOKIE_NAME":"refresh_token",
+    "REFRESH_TOKEN_SAMESITE":"lax",
+    "REFRESH_TOKEN_SECURE":False,
+    "REFRESH_TOKEN_HTTP_ONLY":True,
 }
 ADMIN_URL = os.environ.get('ADMIN_URL')
 CLIENT_URL = os.environ.get('CLIENT_URL')
@@ -197,3 +201,4 @@ CLIENT_URL = os.environ.get('CLIENT_URL')
 REST_USE_JWT = True
 JWT_AUTH_COOKIE = 'access_token'
 JWT_AUTH_REFRESH_COOKIE = 'refresh_token'
+PROJECT_NAME = "INTERN MANAGEMENT SYSTEM"

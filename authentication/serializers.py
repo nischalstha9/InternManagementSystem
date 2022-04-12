@@ -117,13 +117,9 @@ class CommonUserSerializerMixin(serializers.Serializer):
         validators=[UniqueValidator(queryset=CustomUser.objects.all())]
     )
     password = serializers.CharField(min_length=8, write_only=True)
-    avatar_path = serializers.SerializerMethodField()
 
     def get_gender(self, obj):
         return obj.get_gender_display()
-
-    def get_avatar_path(self, obj):
-        return f"{settings.MEDIA_URL}{obj.avatar}"
 
 class CustomUserSerializer(serializers.ModelSerializer, CommonUserSerializerMixin):
     class Meta:
@@ -138,17 +134,14 @@ class CustomUserSerializer(serializers.ModelSerializer, CommonUserSerializerMixi
         'password',
         'gender',
         'phone',
-        'avatar',
         'last_login',
         'email_verified',
-        'avatar_path',
         'role'
         )
         extra_kwargs = {
             'password': {'write_only': True},
             'last_login': {'read_only': True},
             'email_verified': {'read_only': True},
-            'avatar':{'write_only':True},
             'date_joined':{'read_only':True},
             }
 
@@ -162,21 +155,52 @@ class CustomUserSerializer(serializers.ModelSerializer, CommonUserSerializerMixi
         instance.save()
         from django.conf import settings
         request = self.context.get('request')
-        assets_image_path = str(request.build_absolute_uri(
-            settings.MEDIA_URL + DEFAULT_ASSETS_IMAGES_PATH))
-        domain = ADMIN_DOMAIN
-        try:
-            send_register_mail(instance, domain, assets_image_path,
-                               UserTokenSerializer, 'register-confirm-admin.html')
-        except Exception:
-            instance.delete()
-            raise serializers.ValidationError(
-                {"detail": "Error in creating token"})
+        # assets_image_path = str(request.build_absolute_uri(
+        #     settings.MEDIA_URL + DEFAULT_ASSETS_IMAGES_PATH))
+        # domain = ADMIN_DOMAIN
+        # try:
+        #     send_register_mail(instance, domain, assets_image_path,
+        #                        UserTokenSerializer, 'register-confirm-admin.html')
+        # except Exception as exe:
+        #     print(exe)
+        #     instance.delete()
+        #     raise serializers.ValidationError(
+        #         {"detail": "Error in creating token"})
         return instance
 
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
 
+class CustomUserCreateSerializer(CustomUserSerializer):
+    
+    class Meta:
+        model = CustomUser
+        fields = (
+        'id',
+        'first_name',
+        'last_name',
+        'date_joined',
+        'is_active',
+        'email',
+        'password',
+        'gender',
+        'phone',
+        'last_login',
+        'email_verified',
+        'role'
+        )
+        extra_kwargs = {
+            'role':{"required":True},
+            'password': {'write_only': True},
+            'last_login': {'read_only': True},
+            'email_verified': {'read_only': True},
+            'date_joined':{'read_only':True},
+            }
+
+    def validate_role(self, data):
+        if data == 0:
+            raise serializers.ValidationError("You can't register for Superadmin!")
+        return data
 
 class InternSerializer(serializers.ModelSerializer, CommonUserSerializerMixin):
 
@@ -192,10 +216,8 @@ class InternSerializer(serializers.ModelSerializer, CommonUserSerializerMixin):
             'password',
             'gender',
             'phone',
-            'avatar',
             'dob',
             'email_verified',
-            'avatar_path',
             'role'
             )
         extra_kwargs = {
@@ -203,7 +225,6 @@ class InternSerializer(serializers.ModelSerializer, CommonUserSerializerMixin):
             'last_name': {'required': True},
             'password': {'write_only': True},
             'email_verified': {'read_only': True},
-            'avatar':{'write_only':True},
             'role':{'read_only':True},
             'is_active':{'read_only':True},
             'date_joined':{'read_only':True},

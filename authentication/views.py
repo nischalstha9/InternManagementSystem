@@ -1,5 +1,5 @@
 from rest_framework_simplejwt.views import TokenObtainPairView
-from authentication.serializers import MyTokenObtainPairSerializer, CustomUserSerializer, InternSerializer, SupervisorSerializer, UserTokenSerializer, CustomTokenObtainSlidingSerializer, TokenVerificationSerializer, PasswordChangeSerializer,PasswordResetSerializer
+from authentication.serializers import CustomUserCreateSerializer, MyTokenObtainPairSerializer, CustomUserSerializer, InternSerializer, SupervisorSerializer, UserTokenSerializer, CustomTokenObtainSlidingSerializer, TokenVerificationSerializer, PasswordChangeSerializer,PasswordResetSerializer
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from authentication.models import CustomUser, Supervisor, UserToken, Intern
@@ -118,12 +118,12 @@ class UserView(APIView):
             return Supervisor.objects.all()
 
     def get_serializer_class(self):
-        if is_user_admin(self.request):
-            return CustomUserSerializer
-        elif is_user_intern:
-            return InternSerializer
-        else:
-            return SupervisorSerializer
+        return CustomUserSerializer
+        # if is_user_admin(self.request):
+        # elif is_user_intern:
+        #     return InternSerializer
+        # else:
+        #     return SupervisorSerializer
     
 
     def get(self, request):
@@ -169,8 +169,7 @@ class UserView(APIView):
 
     def post(self, request, format='json'):
         try:
-            serializer = self.get_serializer_class()
-            serializer = serializer(data=request.data, context={"request": request})
+            serializer = CustomUserCreateSerializer(data=request.data, context={"request": request})
             if serializer.is_valid():
                 user = serializer.save()
                 if user:
@@ -180,7 +179,7 @@ class UserView(APIView):
         except serializers.ValidationError as err:
             return Response(err.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as exe:
-            return Response({"detail": "Error creating user", "error": exe}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Error creating user", "error": str(exe)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PasswordChangeAPIView(APIView):

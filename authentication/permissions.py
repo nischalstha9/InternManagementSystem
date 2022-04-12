@@ -78,3 +78,9 @@ class IsTaskOwnerOrReadOnlyPermission(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS or is_user_admin(request):
             return True
         return obj.supervisor == request.user
+        
+class IsTaskOwnerPermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if is_user_admin(request):
+            return True
+        return obj.supervisor == request.user

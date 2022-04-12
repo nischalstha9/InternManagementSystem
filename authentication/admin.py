@@ -24,7 +24,7 @@ class CustomUserAdmin(UserAdmin):
     # that reference specific fields on auth.User.
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ("Personal Info", {'fields': ('first_name', 'last_name','gender','phone',"avatar")}),
+        ("Personal Info", {'fields': ('first_name', 'last_name','gender','phone')}),
         ("Status", {'fields': ('is_active',"email_verified",'is_staff', "is_superuser")}),
         ('Permissions', {'fields': ('role',)}),
         ('Important dates', {'fields': ("date_joined",'last_login',)}),
