@@ -24,7 +24,7 @@ class TaskListCreateAPIView(ListCreateAPIView):
         if is_user_admin(self.request):
             qs = Task.objects.all()
         elif is_user_intern(self.request):
-            qs = Task.objects.filter(intern = self.request.user.id)
+            qs = self.request.user.task_obj.all()
         else:
             qs = Task.objects.filter(supervisor=self.request.user.id)
         return qs
@@ -37,7 +37,7 @@ class TaskRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         if is_user_admin(self.request):
             qs = Task.objects.all()
         elif is_user_intern(self.request):
-            qs = Task.objects.filter(intern = self.request.user.id)
+            qs = self.request.user.task_obj.all()
         else:
             qs = Task.objects.filter(supervisor=self.request.user.id)
         return qs
@@ -86,3 +86,6 @@ class TaskCompleteToggleView(UpdateAPIView):
         except Exception as e:
             print(e)
             return Response({"detail":"An error ouccoured!"}, status=status.HTTP_409_CONFLICT)
+
+    def put(self, request, *args, **kwargs):
+        return self.patch(self, request, *args, **kwargs)

@@ -3,8 +3,8 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from attendence.models import Attendence
 from attendence.serializers import AttendenceSerializer
-from rest_framework.generics import ListAPIView
-from authentication.permissions import IsAdminOrSupervisorPermission, IsInternPermission
+from rest_framework.generics import ListAPIView,RetrieveUpdateDestroyAPIView
+from authentication.permissions import IsAdminOrSupervisorPermission, IsAdminPermission, IsInternPermission
 from rest_framework.response import Response
 from rest_framework import status
 from django_filters.rest_framework import DjangoFilterBackend
@@ -35,3 +35,10 @@ class AttendenceListAPIView(ListAPIView):
     def get_queryset(self):
         qs = Attendence.objects.all()
         return qs
+
+class AttendenceRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    serializer_class = AttendenceSerializer
+    permission_classes = [IsAdminOrSupervisorPermission]
+    
+    def get_queryset(self):
+        return Attendence.objects.all()
